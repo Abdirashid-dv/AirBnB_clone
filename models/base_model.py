@@ -15,15 +15,17 @@ class BaseModel:
             *args: Unused
             **kwargs: Key-value pairs of attributes
         """
+        self.id = str(uuid4())
+        self.created_at = self.updated_at = datetime.now()
         if kwargs:
             for key, value in kwargs.items():
                 if key == "created_at" or key == "updated_at":
-                    value = datetime.strptime(value, "%Y-%m-%dT%H:%M:%S.%f")
-                if key != "__class__":
-                    setattr(self, key, value)
+                    self.__dict__[key] = datetime.strptime(
+                        value, "%Y-%m-%dT%H:%M:%S.%f"
+                    )
+                else:
+                    self.__dict__[key] = value
         else:
-            self.id = str(uuid4())
-            self.created_at = self.updated_at = datetime.now()
             models.storage.new(self)
 
     def save(self) -> None:
@@ -43,4 +45,3 @@ class BaseModel:
         """Returns a string representation of the BaseModel"""
         class_name = self.__class__.__name__
         return "[{}] ({}) {}".format(class_name, self.id, self.__dict__)
-
